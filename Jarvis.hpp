@@ -157,23 +157,102 @@ class Jarvis{
 private:
     InterRobot robot;
     SpeechRec sr;
+    std::unordered_map<std::string, std::string> command_set;
 public:
     Jarvis()
-    {}
+    {
+        char buffer[256];
+        std::ifstream in(CMD_ETC);
+        if(!in.is_open()){
+            std::cerr << "open file error" <<std::endl;
+            exit(1);
+
+        }
+        std::string sep = ":";
+        while(in.getline(buffer, sizeof(buffer))){
+            std::string str = buffer;
+            std::size_t pos = str.find(sep);
+            if(std::string::npos == pos){
+                std::cerr << "Load Etc Error" << std::endl;
+                exit(2);
+
+            }
+            std::string k = str.substr(0, pos);
+            std::string v = str.substr(pos+sep.size());
+            k+="。";
+            command_set.insert(std::make_pair(k, v));
+
+        }
+        std::cout << "Load command etc ... done" << std::endl;
+        in.close();
+    }
+    bool Exec(std::string command, bool print)
+    {
+        std::cout << command << std::endl;
+        FILE *fp = popen(command.c_str(), "r");
+        if(NULL == fp){
+            std::cerr << "popen error!" << std::endl;
+            return false;
+        }
+        if(print){
+            char c;
+            std::cout << "--------------------start---------------------" << std::endl;
+            while (fread(&c, 1, 1, fp) > 0){
+                std::cout << c;
+            }
+            std::cout << std::endl;
+            std::cout << "---------------------end----------------------" << std::endl;
+        }
+        pclose(fp);
+        return true;
+    }
+    //判定消息是否是需要执行的命令，如果是命令，需要执行他，而不需要交给图灵机器人进行对话
+    bool MessageIsCommand(std::string _message, std::string &cmd)
+    {
+        std::unordered_map<std::string, std::string>::iterator iter =
+            command_set.find(_message);
+        if(iter != command_set.end())
+        {
+            cmd = iter->second;
+            return true;
+        }
+        cmd = "";
+        return false;
+    }
     void run()
     {
+        volatile bool quit = false;
         std::string message;
-        std::cout << "请输入：" << std::endl;
-        std::cin>>message;
-        while(!message.empty()){
-            std::string result = robot.Talk(message);
-            sr.TTS(result);
+        while(!quit){
+            message="";
             std::cout << "请输入：" << std::endl;
             std::cin>>message;
+            bool ret = message.empty();
+            if(!ret){
+                std::string cmd;
+                std::cout << "我: " << message << std::endl;
+                if(MessageIsCommand(message, cmd)){//判定是否是命令
+                    if(message == "退出"){
+                        //TTSAndPlay("好的");
+                        std::cout << "bye bye ... :)" << std::endl;
+                        quit = true;
+                        Exec(cmd,false);
+                    }
+                    else{
+                        Exec(cmd, true);
+                    }
+                }
+                else{ //不是命令，就交付给图灵机器人识别
+                    std::string play_message = robot.Talk(message);
+                    std::cout << play_message << std::endl;
+                    sr.TTS(play_message);
+                }
+            }
         }
     }
     ~Jarvis()
     {}
+
 };
 
 #endif
