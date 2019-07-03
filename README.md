@@ -15,7 +15,7 @@
 
 5、Linux系统知识 
 
-#使用指南
+# 使用指南
 
 1、从github克隆到本地：
     git clone https://github.com/hjfgit/Linux_voice_management_tool.git
