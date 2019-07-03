@@ -181,7 +181,6 @@ public:
             std::string k = str.substr(0, pos);
             std::string v = str.substr(pos+sep.size());
             k+="。";
-            //std::cout << k << ":" << v << std::endl;
             command_set.insert(std::make_pair(k, v));
 
         }
@@ -190,7 +189,6 @@ public:
     }
     bool Exec(std::string command, bool print)
     {
-        //std::cout << command << std::endl;
         FILE *fp = popen(command.c_str(), "r");
         if(NULL == fp){
             std::cerr << "popen error!" << std::endl;
@@ -268,7 +266,7 @@ public:
             //bool ret = message.empty();
             if(ret){
                 std::string cmd;
-                std::cout << "我: " << message << std::endl;
+                std::cout << "life: " << message << std::endl;
                 if(MessageIsCommand(message, cmd)){//判定是否是命令
                     std::cout << "start is command" << std::endl;
                     if(message == "退出。"){
