@@ -7,8 +7,9 @@
 #include <sstream>
 #include <string>
 #include <json/json.h>
-#include "speech/base/http.h"
-#include "speech/speech.h"
+#include "include/base/http.h"
+#include "include/speech.h"
+#include "include/image_classify.h"
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -23,7 +24,7 @@
 #define SPEECH_FILE "temp_file/demo.wav"
 #define PLAY_FILE "temp_file/play.mp3"
 #define CMD_ETC "command.etc"
-
+#define IMAGE_FILE "image/test.jpg"
 
 
 //连接到图灵机器人 智能对话
@@ -88,6 +89,45 @@ public:
     ~InterRobot()
     {}
 };
+//百度AI图像处理
+
+class ImageProcessing{
+private:
+    std::string app_id = "16703236";
+    std::string api_key = "Kw4B3HZkFLpL9vE3TXKUcu5F";
+    std::string secret_key = "C8SzocgxQa5Me8C14KhmaWBeZfhjDajp";
+    aip::Imageclassify *client;
+public:
+    ImageProcessing()
+    {
+        client = new aip::Imageclassify(app_id, api_key, secret_key);
+    }
+    void ImageResult()
+    {
+        Json::Value result;
+        std::string image;
+        aip::get_file_content(IMAGE_FILE, &image);
+        // 调用通用物体识别
+        //result = client->advanced_general(image, aip::null);
+        // 调用logo商标识别
+        //result = client->logo_search(image, aip::null);
+        //std::cout << result.toStyledString() << std::endl;
+
+        // 如果有可选参数
+        std::map<std::string, std::string> options;
+        options["custom_lib"] = "false";
+        // 带参数调用logo商标识别
+        result = client->logo_search(image, options);
+        std::cout << result.toStyledString() << std::endl;
+
+    }
+    ~ImageProcessing()
+    {}
+};
+
+
+
+//百度AI语音识别
 class SpeechRec{
 private:
     //你注册完毕百度语音识别平台的账号后，在平台上就会有你的app_id
