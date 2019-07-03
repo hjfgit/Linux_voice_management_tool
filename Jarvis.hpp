@@ -30,8 +30,8 @@
 class InterRobot{
 private:
     std::string url = "http://openapi.tuling123.com/openapi/api/v2";
-    //std::string api_key = "8d60c5a550ae4cc99fe4e82ff051c0e3";
-    std::string api_key = "76637bcc4aec472ea53f3647482bcb29";
+    std::string api_key = "8d60c5a550ae4cc99fe4e82ff051c0e3";
+    //std::string api_key = "26b3b70191b1493e840538412eabdc1e";
     std::string user_id = "1";
     aip::HttpClient client;
 
@@ -180,6 +180,7 @@ public:
             std::string k = str.substr(0, pos);
             std::string v = str.substr(pos+sep.size());
             k+="。";
+            //std::cout << k << ":" << v << std::endl;
             command_set.insert(std::make_pair(k, v));
 
         }
@@ -219,21 +220,58 @@ public:
         cmd = "";
         return false;
     }
+    //使用arecord工具进行录音，并进行语音识别，语音转文本
+    bool RecordAndASR(std::string &message)
+    {
+        int err_code = -1;
+        std::string record = "arecord -t wav -c 1 -r 16000 -d 5 -f S16_LE ";
+        record += SPEECH_FILE;
+        record += ">/dev/null 2>&1"; //不显示输出结果或者消息
+        std::cout << "...请讲话...";
+        fflush(stdout);
+        if(Exec(record, false)){
+            sr.ASR(err_code, message);
+            if(err_code == 0){
+                return true;
+            }
+            std::cout << "语音识别失败..." << std::endl;
+        }
+        else{
+            std::cout << "录制失败..." << std::endl;
+        }
+        return false;
+    }
+
+    //使用百度语音合成接口，文本转语音，在使用cvlc进行本地播放
+    bool TTSAndPlay(std::string message)
+    {
+        //cvlc命令行式的播放
+        std::string play = "cvlc --play-and-exit ";//播放完毕退出：--play-and-exit
+        play += PLAY_FILE;
+        play += " >/dev/null 2>&1";
+        sr.TTS(message); //语音识别
+        Exec(play, false); //执行播放
+        return true;
+    }
+
     void run()
     {
         volatile bool quit = false;
         std::string message;
         while(!quit){
             message="";
-            std::cout << "请输入：" << std::endl;
-            std::cin>>message;
-            bool ret = message.empty();
+            sleep(5);
+            bool ret = RecordAndASR(message);
+            //std::cout << "请输入：" << std::endl;
+            //std::cin>>message;
+            //bool ret = message.empty();
             if(!ret){
                 std::string cmd;
                 std::cout << "我: " << message << std::endl;
                 if(MessageIsCommand(message, cmd)){//判定是否是命令
-                    if(message == "退出"){
-                        //TTSAndPlay("好的");
+                    std::cout << "start is command" << std::endl;
+                    if(message == "退出。"){
+                        TTSAndPlay("好的");
                         std::cout << "bye bye ... :)" << std::endl;
                         quit = true;
                         Exec(cmd,false);
@@ -244,7 +282,7 @@ public:
                 }
                 else{ //不是命令，就交付给图灵机器人识别
                     std::string play_message = robot.Talk(message);
-                    std::cout << play_message << std::endl;
+                    //std::cout << play_message << std::endl;
                     sr.TTS(play_message);
                 }
             }
