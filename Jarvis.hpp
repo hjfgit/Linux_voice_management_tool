@@ -116,6 +116,7 @@ public:
         Json::Value result = client->recognize(file_content, "wav", 16000, options);
         err_code = result["err_no"].asInt();
         if(err_code == 0){
+			//std::cout<<"err_code == 0"<<std::endl;
             // std::cout << result.toStyledString() << std::endl;
             message = result["result"][0].asString();
             // std::cout << "message : " << message<< std::endl;
@@ -189,7 +190,7 @@ public:
     }
     bool Exec(std::string command, bool print)
     {
-        std::cout << command << std::endl;
+        //std::cout << command << std::endl;
         FILE *fp = popen(command.c_str(), "r");
         if(NULL == fp){
             std::cerr << "popen error!" << std::endl;
@@ -238,7 +239,7 @@ public:
         }
         else{
             std::cout << "录制失败..." << std::endl;
-        }
+       }
         return false;
     }
 
@@ -265,7 +266,7 @@ public:
             //std::cout << "请输入：" << std::endl;
             //std::cin>>message;
             //bool ret = message.empty();
-            if(!ret){
+            if(ret){
                 std::string cmd;
                 std::cout << "我: " << message << std::endl;
                 if(MessageIsCommand(message, cmd)){//判定是否是命令
@@ -283,9 +284,10 @@ public:
                 else{ //不是命令，就交付给图灵机器人识别
                     std::string play_message = robot.Talk(message);
                     //std::cout << play_message << std::endl;
-                    sr.TTS(play_message);
+                    //sr.TTS(play_message);
+					TTSAndPlay(play_message);
                 }
-            }
+			}
         }
     }
     ~Jarvis()
