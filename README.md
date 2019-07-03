@@ -18,13 +18,17 @@
 # 使用指南
 
 1、从github克隆到本地：
+
     git clone https://github.com/hjfgit/Linux_voice_management_tool.git
 
 2、进入到Linux_voice_management_tool目录：
+
     cd Linux_voice_management_tool
 
 3、make进行编译
+
     make
 
 4、./Jarvis 进行执行
+
     ./Jarvis
