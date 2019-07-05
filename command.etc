@@ -5,5 +5,5 @@
 关闭防火墙: systemctl stop firewalld
 打开防火墙: systemctl start firewalld
 查看进程: ps aux
-显示当前目录结构：tree
-图像处理：./test
+显示当前目录结构: tree
+图像处理: ./test
