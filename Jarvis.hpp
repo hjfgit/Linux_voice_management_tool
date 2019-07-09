@@ -20,12 +20,10 @@
 #include <fcntl.h>
 #include <unordered_map>
 
-
 #define SPEECH_FILE "temp_file/demo.wav"
 #define PLAY_FILE "temp_file/play.mp3"
 #define CMD_ETC "command.etc"
 #define IMAGE_FILE "image/test.jpg"
-
 
 //连接到图灵机器人 智能对话
 class InterRobot{
@@ -72,18 +70,10 @@ public:
         item2["userId"] = user_id;
         root["userInfo"] = item2;
         item2.clear();
-        //std::cout << root.toStyledString() << std::endl;
         Json::Value ret = PostRequest(root);
-        //std::cout << result.toStyledString() << std::endl;
-        //Json::Value Intent = result["intent"];
         Json::Value _result = ret["results"];
         Json::Value values = _result[0]["values"];
         std::cout <<"Robot: "<< values["text"].asString() << std::endl;
-        //for(auto i = 0; i < _result.size(); i++){
-        //    Json::Value values = _result[i]["values"];
-        //    std::cout <<"Robot: "<< values["text"].asString() << std::endl;
-        //}
-        //std::cout << result.toStyledString() << std::endl;
         return values["text"].asString();
     }
     ~InterRobot()
@@ -112,7 +102,6 @@ public:
         // 调用logo商标识别
         //result = client->logo_search(image, aip::null);
         //std::cout << result.toStyledString() << std::endl;
-
         // 如果有可选参数
         std::map<std::string, std::string> options;
         options["custom_lib"] = "false";
@@ -156,15 +145,11 @@ public:
         Json::Value result = client->recognize(file_content, "wav", 16000, options);
         err_code = result["err_no"].asInt();
         if(err_code == 0){
-			//std::cout<<"err_code == 0"<<std::endl;
-            // std::cout << result.toStyledString() << std::endl;
             message = result["result"][0].asString();
-            // std::cout << "message : " << message<< std::endl;
         }
         else{
             message="...识别错误...";
         }
-        //std::cout << "语音识别结果: " << std::endl << result.toStyledString();
     }
     //语音合成Text To Speech
     void TTS(std::string message)
@@ -292,7 +277,6 @@ public:
         Exec(play, false); //执行播放
         return true;
     }
-
     void run()
     {
         volatile bool quit = false;
@@ -301,9 +285,6 @@ public:
             message="";
             sleep(5);
             bool ret = RecordAndASR(message);
-            //std::cout << "请输入：" << std::endl;
-            //std::cin>>message;
-            //bool ret = message.empty();
             if(ret){
                 std::string cmd;
                 std::cout << "life: " << message << std::endl;
@@ -321,8 +302,6 @@ public:
                 }
                 else{ //不是命令，就交付给图灵机器人识别
                     std::string play_message = robot.Talk(message);
-                    //std::cout << play_message << std::endl;
-                    //sr.TTS(play_message);
 					TTSAndPlay(play_message);
                 }
 			}
@@ -330,9 +309,5 @@ public:
     }
     ~Jarvis()
     {}
-
 };
-
 #endif
-
-
